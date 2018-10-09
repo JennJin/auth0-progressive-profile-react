@@ -12,7 +12,7 @@ class Home extends Component {
         {
           isAuthenticated() && (
               <h4>
-                You are logged in! You can now view your{' '}
+                You are logged in! To see the Progressive Profile in action goto the {' '}
                 <Link to="profile">profile area</Link>
                 .
               </h4>
