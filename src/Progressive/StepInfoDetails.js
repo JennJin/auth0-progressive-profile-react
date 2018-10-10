@@ -72,6 +72,7 @@ class StepInfoDetails extends Component  {
        
         renderForm = () => {
         let model = this.props.StepInfo.questions;
+        var cValues = JSON.parse(this.state.metadata);
         
         let formUI = model.map((m) => {
             let key = m.key;
@@ -93,7 +94,12 @@ class StepInfoDetails extends Component  {
 
             if (type === "radio") {
                input = m.options.map((o) => {
-                   let checked = o.value === value;
+                    var checked;
+                    if (!cValues[key]) {
+                        checked = (index === 0) ? checked = 'checked' : checked = '';
+                    } else {
+                        checked = (cValues[key] === o.value) ? checked = 'checked' : checked = '';
+                    }
                     return (
                         <React.Fragment key={'fr' + o.key}>
                         
