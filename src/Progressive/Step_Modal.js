@@ -24,56 +24,40 @@ class StepModal extends Component {
     }
 
     handleClose() {
-    this.setState({ show: false });
+      this.setState({ show: false });
     }
 
     handleShow() {
       this.setState({ show: true });
     }
   
-    handleSubmit = (model) => {
-                   console.log("Submit - Updated metadata: "+model);
-                   var uData = JSON.parse(model);
-                   
-                   // Update Step
-                   var newStep= uData.step+1;
-                   uData.step = newStep;
-                   
-                   auth.patchUserMetadata(uData);
-                   this.setState({ show: false });
+    handleSubmit = (data) => {
+      console.log("Submit - Updated metadata: "+JSON.stringify(data));
+       
+      // Update Step
+      var newStep= data.step+1;
+      data.step = newStep;        
+      auth.patchUserMetadata(data);
+      this.setState({ show: false });
     }
     
-
 render () {
-    
-    
     return (
-        
         <div>
-
         <Modal show={this.state.show} onHide={this.handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>{this.state.StepInfo.title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-               <StepInfoDetails StepInfo={this.state.StepInfo} metadata={this.props.userMetadata} onSubmit={(model) => {this.handleSubmit(model)}} />
-            
+            <StepInfoDetails StepInfo={this.state.StepInfo} metadata={this.props.userMetadata} onSubmit={(model) => {this.handleSubmit(model)}} />
         </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.handleClose}>Close</Button>
           </Modal.Footer>
         </Modal>
-      </div>
-     
-        
-        
+      </div> 
     )
-
+  }
 }
-
-
-
-}
-
 export default StepModal;
 

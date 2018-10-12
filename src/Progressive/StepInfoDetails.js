@@ -2,77 +2,70 @@ import React, { Component } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import './progressive.css';
 
-
 class StepInfoDetails extends Component  {
-        state = {};
-        constructor(props) {
-                super(props);
-                
-                this.state = {
-                        show: true,
-                        metadata: this.props.metadata
-                };
 
-                this.handleSkip = this.handleSkip.bind(this);
-        }
+    constructor(props) {
+        super(props);
+
+        this.state = {
+          show: true,
+          metadata: JSON.parse(localStorage.getItem('userMetadata'))
+        };
+
+        this.handleSkip = this.handleSkip.bind(this);
+    }
         
-        onChange = (e, key,type="single") => {
+    onChange = (e, key,type="single") => {   
+        var metadata = this.state.metadata;
+        //console.log ("meta: "+JSON.stringify(metadata));
                 
-                var metadata = JSON.parse(this.state.metadata);
-                console.log ("meta: "+JSON.stringify(metadata));
-                
-                console.log(`${key} changed ${e.target.value} type ${type}`);
-               if (type === "single") {
-                        metadata[key]= e.target.value  
-                   this.setState(
-                           {metadata: JSON.stringify(metadata)}
-                       );
-               } else {
-                   // Array of values (e.g. checkbox): TODO: Optimization needed.
-                   let found = metadata[key] ?  
-                                   metadata[key].find ((d) => d === e.target.value) : false;
+        console.log(`${key} changed ${e.target.value} type ${type}`);
+        if (type === "single") {
+            metadata[key]= e.target.value  
+            this.setState(
+              {metadata: metadata}
+            );
+        } else {
+            // Array of values (e.g. checkbox)
+            let found = metadata[key] ?  
+            metadata[key].find ((d) => d === e.target.value) : false;
                    
-                   if (found) {
-                       let data = metadata[key].filter((d) => {
-                           return d !== found;
-                       });
-                       metadata[key] = data; 
-                       this.setState(
-                           {metadata: JSON.stringify(metadata)}
-                       );
-                   } else {
-                        metadata[key].push(e.target.value);
-                       this.setState(
-                            {metadata: JSON.stringify(metadata)}
-                       );
-                   }
-               }
-           }
-            
-                
-        
-        handleSubmit = (e) => {
-               e.preventDefault();
-                if (this.props.onSubmit) this.props.onSubmit(this.state.metadata);
-        }
+            if (found) {
+              let data = metadata[key].filter((d) => {
+                return d !== found;
+              });
+              metadata[key] = data; 
+              this.setState(
+                {metadata: JSON.stringify(metadata)}
+              );
+            } else {
+              metadata[key].push(e.target.value);
+              this.setState(
+                {metadata: JSON.stringify(metadata)}
+              );
+            }
+          }
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+        if (this.props.onSubmit) this.props.onSubmit(this.state.metadata);
+    }
   
-        handleSkip() {
+    handleSkip() {          
+      var data = this.state.metadata;
                 
-                var data = JSON.parse(this.state.metadata);
-                
-                for (var i=0; i < this.props.StepInfo.questions.length; i++ ){
-                        var key = this.props.StepInfo.questions[i].key;
-                        data[key] = "skip";
-                }
-                
-                console.log("Skip: "+JSON.stringify(data));
-                this.props.onSubmit(JSON.stringify(data));
-        }
+      for (var i=0; i < this.props.StepInfo.questions.length; i++ ){
+          var key = this.props.StepInfo.questions[i].key;
+           data[key] = "skip";
+      }
+      //console.log("Skip: "+JSON.stringify(data));
+      this.props.onSubmit(data);
+    }
         
-       
         renderForm = () => {
         let model = this.props.StepInfo.questions;
-        var cValues = JSON.parse(this.state.metadata);
+        var cValues = this.state.metadata;
         
         let formUI = model.map((m) => {
             let key = m.key;
@@ -93,13 +86,15 @@ class StepInfoDetails extends Component  {
                 />;
 
             if (type === "radio") {
-               input = m.options.map((o) => {
+               input = m.options.map((o, index) => {
                     var checked;
                     if (!cValues[key]) {
-                        checked = (index === 0) ? checked = 'checked' : checked = '';
+                      // select the first value as default
+                      checked = (index === 0) ? checked = 'checked' : checked = '';
                     } else {
-                        checked = (cValues[key] === o.value) ? checked = 'checked' : checked = '';
+                      checked = (cValues[key] === o.value) ? checked = 'checked' : checked = '';
                     }
+
                     return (
                         <React.Fragment key={'fr' + o.key}>
                         
@@ -122,7 +117,6 @@ class StepInfoDetails extends Component  {
                input = <div className="form-group-radio">{input}</div>;
                }
             
-            
             if (type === "select") {
                 input = m.options.map((o) => {
                     console.log("select: ", o.value, value);
@@ -134,20 +128,13 @@ class StepInfoDetails extends Component  {
                             >{o.value}</option>
                      );
                 });
-
-                //console.log("Select default: ", value);
                 input = <select className="form-control" value={value} onChange={(e)=>{this.onChange(e, m.key)}}>{input}</select>;
-             
              }
-            
 
              if (type === "checkbox") {
                 input = m.options.map((o) => {
-                    
-                    //console.log("Checkbox: ",checked);
-                     return (
-                        <React.Fragment key={"cfr" + o.key}>
-                        
+                  return (
+                      <React.Fragment key={"cfr" + o.key}>
                         <div className="checkbox">
                             <label key={"ll" +o.key }>
                             <input {...props}
@@ -156,20 +143,16 @@ class StepInfoDetails extends Component  {
                                 key={o.key}
                                 name={o.name}
                                 value={o.value}
-                                onChange={(e)=>{this.onChange(e, m.key,"multiple")}}
+                                onChange={(e)=>{this.onChange(e, m.key)}}
                             />
                             {o.label}</label>
-                            </div>
-
+                          </div>
                         </React.Fragment>
                      );
                 });
-
                 input = <div className="form-group-checkbox">{input}</div>;
-
              }
-        
-            
+
             return (
                 <div key={'g' + key} className="form-group">
                 <div className="">
@@ -178,47 +161,40 @@ class StepInfoDetails extends Component  {
                         htmlFor={key}>
                         {m.label}
                     </label>
-                   
                     {input}
                      </div>
                 </div>
             );
         });
         return formUI;
-            }
-    
-        
-        
-        render () {
-                console.log("State: "+this.state.metadata);
-
-                return (
-                        
-                <div className="row">
-                        <div className="container-fluid">
-                        <div className="row">
-                                <Form className="form-horizontal">
-                                 {this.renderForm()}
-                                </Form>
+    }
+         
+      render () {
+          return (        
+              <div className="row">
+                  <div className="container-fluid">
+                    <div className="row">
+                        <Form className="form-horizontal">
+                          {this.renderForm()}
+                        </Form>
+                    </div>
+                    <div className="row">
+                      <div className="container-fluid text-center">
+                        <div className="center-block">
+                          <Button id="submit" bsStyle="primary" bsSize="small" onClick={(e)=>{this.handleSubmit(e)}}>
+                            Submit
+                          </Button>
                         </div>
-                        <div className="row">
-                        <div className="container-fluid text-center">
-                                <div className="center-block">
-                                <Button id="submit" bsStyle="primary" bsSize="small" onClick={(e)=>{this.handleSubmit(e)}}>
-                                Submit
-                                </Button>
-                                </div>
-                                <div className="center-block">
-                                <Button id="skip" bsStyle="link" bsSize="small" onClick={this.handleSkip}>
-                                skip
-                                </Button>
-                                </div>
+                        <div className="center-block">
+                          <Button id="skip" bsStyle="link" bsSize="small" onClick={this.handleSkip}>
+                            skip
+                          </Button>
                         </div>
-                        </div>
-                        </div>
-                </div>
+                      </div>
+                    </div>
+                  </div>
+              </div>
                 );
-
         }
 }
 export default StepInfoDetails;
